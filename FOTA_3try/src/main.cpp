@@ -27,7 +27,7 @@ int ServoMin=100;
 int ServoMax=600;
 // variable to caculate mpu
 static float trucXBase = 10.4,  trucYBase = 10.4;           // // Roll: góc nghiêng hai bên , Pitch: góc nghiêng trước sau
-float RollBase = 86.0, PitchBase = 88.0;             // //Cúi xuống: Pitch giảm // Ngửa lên: Pitch tăng // Nghiêng trái: Roll giảm // Nghiêng phải: Roll tăng
+float RollBase[3] = {80.0, 85.0, 90.0}, PitchBase[3] = {80.0, 85.0, 90.0};             // //Cúi xuống: Pitch giảm // Ngửa lên: Pitch tăng // Nghiêng trái: Roll giảm // Nghiêng phải: Roll tăng
 // trajectory
 float x[ 160 ] = { 106.0,106.0,106.0,106.0,106.0,106.0,106.0,106.0,106.0,106.0,106.0,106.0,106.0,106.0,106.0,106.0,106.0,106.0,106.0,106.0,106.0,106.0,106.0,106.0,106.0,106.0,106.0,106.0,106.0,106.0,106.0,106.0,106.0,106.0,106.0,106.0,106.0,106.0,106.0,106.0,106.0,106.0,106.0,106.0,106.0,106.0,106.0,106.0,106.0,106.0,106.0,106.0,106.0,106.0,106.0,106.0,106.0,106.0,106.0,106.0,106.0,106.0,106.0,106.0,106.0,106.0,106.0,106.0,106.0,106.0,106.0,106.0,106.0,106.0,106.0,106.0,106.0,106.0,106.0,106.0,106.0,106.0,106.0,106.0,106.0,106.0,106.0,106.0,106.0,106.0,106.0,106.0,106.0,106.0,106.0,106.0,106.0,106.0,106.0,106.0,106.0,106.0,106.0,106.0,106.0,106.0,106.0,106.0,106.0,106.0,106.0,106.0,106.0,106.0,106.0,106.0,106.0,106.0,106.0,106.0,106.0,106.0,106.0,106.0,106.0,106.0,106.0,106.0,106.0,106.0,106.0,106.0,106.0,106.0,106.0,106.0,106.0,106.0,106.0,106.0,106.0,106.0,106.0,106.0,106.0,106.0,106.0,106.0,106.0,106.0,106.0,106.0,106.0,106.0,106.0,106.0,106.0,106.0,106.0,106.0 };
 float y[ 160 ] = { -40.0,-39.9,-39.5,-38.8,-37.9,-36.8,-35.4,-33.8,-32.0,-29.9,-27.7,-25.3,-22.7,-20.0,-17.1,-14.2,-11.1,-8.0,-4.8,-1.6,1.6,4.8,8.0,11.1,14.2,17.1,20.0,22.7,25.3,27.7,29.9,32.0,33.8,35.4,36.8,37.9,38.8,39.5,39.9,40.0,40.0,37.9,35.9,33.8,31.8,29.7,27.7,25.6,23.6,21.5,19.5,17.4,15.4,13.3,11.3,9.2,7.2,5.1,3.1,1.0,-1.0,-3.1,-5.1,-7.2,-9.2,-11.3,-13.3,-15.4,-17.4,-19.5,-21.5,-23.6,-25.6,-27.7,-29.7,-31.8,-33.8,-35.9,-37.9,-40.0,40.0,37.9,35.9,33.8,31.8,29.7,27.7,25.6,23.6,21.5,19.5,17.4,15.4,13.3,11.3,9.2,7.2,5.1,3.1,1.0,-1.0,-3.1,-5.1,-7.2,-9.2,-11.3,-13.3,-15.4,-17.4,-19.5,-21.5,-23.6,-25.6,-27.7,-29.7,-31.8,-33.8,-35.9,-37.9,-40.0,-40.0,-39.9,-39.5,-38.8,-37.9,-36.8,-35.4,-33.8,-32.0,-29.9,-27.7,-25.3,-22.7,-20.0,-17.1,-14.2,-11.1,-8.0,-4.8,-1.6,1.6,4.8,8.0,11.1,14.2,17.1,20.0,22.7,25.3,27.7,29.9,32.0,33.8,35.4,36.8,37.9,38.8,39.5,39.9,40.0 };
@@ -62,9 +62,9 @@ float * find_theta_23(int h, int L1, int L2, int L3, int x, int z, float *theta)
   return theta;
 }
 float * inK(int x, int y, int z, float *euler){
-  int coxa=37;    //1st
-  int femur=60;   //2nd
-  int tibia=90;
+  int coxa=37;    //L1
+  int femur=60;   //L2
+  int tibia=90;   //L3
   int h=36;
   euler[0] = atan(float(y)/float(x));
   float pos[2];
@@ -410,13 +410,6 @@ const char index_html[] PROGMEM = R"rawliteral(
 void notifyClients() {
   ws.textAll(String(ledState));
 }
-// void recvMsg(uint8_t *data, size_t len){
-//   WebSerial.println("Received Data...");
-//   String d = "";
-//   for(int i=0; i < len; i++){
-//     d += char(data[i]);
-//   }
-// }
 void handleWebSocketMessage(void *arg, uint8_t *data, size_t len) {
   AwsFrameInfo *info = (AwsFrameInfo*)arg;
   if (info->final && info->index == 0 && info->len == len && info->opcode == WS_TEXT) {
@@ -519,7 +512,7 @@ void setup(){
   Serial.println("MPU6050 Found!");
   mpu.setAccelerometerRange(MPU6050_RANGE_8_G);
   mpu.setGyroRange(MPU6050_RANGE_500_DEG);
-  mpu.setFilterBandwidth(MPU6050_BAND_5_HZ);
+  mpu.setFilterBandwidth(MPU6050_BAND_21_HZ);
   //end up setup
   // standup(90);
   delay(2000);
@@ -530,60 +523,87 @@ void loop() {
   // standup(90);
   sensors_event_t a, g, temp;
   mpu.getEvent(&a, &g, &temp);
-//////////////////////////////////////////////walking IK no_balance
-//   float theta1[3], theta2[3], theta_1r[3], theta_2r[3], theta_1l[3], theta_2l[3];
-//   for (int i = 0, j = (sizeof(z)/sizeof(float)) /2   ; i< (sizeof(z)/sizeof(float)) /2, j < sizeof(z)/sizeof(float); i++, j++ ){
-//     inK(x[j], y[j], z[j], theta1);                                                     // tính IK với 2 pha khác nhau 1 và 2
-//     inK(x[i], y[i], z[i], theta2);
-//     delay(60);
-//     ik_to_theta_control_right_leg(theta1[0], theta1[1], theta1[2], theta_1r);           // chuyển giá trị ik ở 2 pha sang giá trị góc để điều khiển 2 pha ở 2 bên trái-phải
-//     ik_to_theta_control_left_leg(theta1[0], theta1[1], theta1[2], theta_1l);
-//     ik_to_theta_control_right_leg(theta2[0], theta2[1], theta2[2], theta_2r);
-//     ik_to_theta_control_left_leg(theta2[0], theta2[1], theta2[2], theta_2l);
-// // web Serial
-//     WebSerial.print(theta_1r[0]); WebSerial.print("//");
+// /////////////////al.print("//");
 //     WebSerial.print(theta_1r[1]); WebSerial.print("//");
 //     WebSerial.print(theta_2r[2]); WebSerial.println("//");
-//     walk_IK_n0_balance(theta_1r[0], theta_1r[1], theta_1r[2], theta_1l[0], theta_1l[1], theta_1l[2], theta_2r[0], theta_2r[1], theta_2r[2], theta_2l[0], theta_2l[1], theta_2l[2]);
+//     walk_IK_no_balance(theta_1r[0], theta_1r[1], theta_1r[2], theta_1l[0], theta_1l[1], theta_1l[2], theta_2r[0], theta_2r[1], theta_2r[2], theta_2l[0], theta_2l[1], theta_2l[2]);
 //     // walk_1side_right_IK(theta_1r[0], theta_1r[1], theta_1r[2], theta_2r[0], theta_2r[1], theta_2r[2]); 
 //   }
-//   // delay(50);
-//////////////////////////////////////////////mpu balance
-// // Roll: góc nghiêng hai bên , Pitch: góc nghiêng trước sau
-// //Cúi xuống: Pitch giảm // Ngửa lên: Pitch tăng // Nghiêng trái: Roll giảm // Nghiêng phải: Roll tăng
+// //   // delay(50);
+
+// //////////////////////////////////////////////         mpu balance
+// // // Roll: góc nghiêng hai bên , Pitch: góc nghiêng trước sau
+// // //Cúi xuống: Pitch giảm // Ngửa lên: Pitch tăng // Nghiêng trái: Roll giảm // Nghiêng phải: Roll tăng
+//   float thetaRight0[3],thetaRight1[3],thetaRight2[3], thetaLeft0[3], thetaLeft1[3], thetaLeft2[3];
+//   float roll = RollTheta(a.acceleration.x), pitch = PitchTheta(a.acceleration.y);
+//   WebSerial.print(roll); WebSerial.print("//");WebSerial.print(pitch);
+//   float ZdeltaRoll = 0 + roundf((-roll + RollBase)*2),
+//         ZdeltaPitch = 0 + roundf((pitch  -  PitchBase)*2);
+//   inK(balanece_pos[0], balanece_pos[1], balanece_pos[2] + ZdeltaRoll - ZdeltaPitch , thetaLeft2);                  // Left leg
+//   inK(balanece_pos[0], balanece_pos[1], balanece_pos[2] + ZdeltaRoll , thetaLeft1);
+//   inK(balanece_pos[0], balanece_pos[1], balanece_pos[2] + ZdeltaRoll + ZdeltaPitch , thetaLeft0);
+//   inK(balanece_pos[0], balanece_pos[1], balanece_pos[2] - ZdeltaRoll - ZdeltaPitch  , thetaRight2);                  //Right Leg
+//   inK(balanece_pos[0], balanece_pos[1], balanece_pos[2] - ZdeltaRoll , thetaRight1);
+//   inK(balanece_pos[0], balanece_pos[1], balanece_pos[2] - ZdeltaRoll + ZdeltaPitch  , thetaRight0);
+//   //// convert theta
+//   ik_to_theta_control_left_leg(thetaLeft0[0], thetaLeft0[1], thetaLeft0[2], thetaLeft0);
+//   ik_to_theta_control_left_leg(thetaLeft1[0], thetaLeft1[1], thetaLeft1[2], thetaLeft1);
+//   ik_to_theta_control_left_leg(thetaLeft2[0], thetaLeft2[1], thetaLeft2[2], thetaLeft2);
+//   ik_to_theta_control_right_leg(thetaRight0[0], thetaRight0[1], thetaRight0[2], thetaRight0);
+//   ik_to_theta_control_right_leg(thetaRight1[0], thetaRight1[1], thetaRight1[2], thetaRight1);
+//   ik_to_theta_control_right_leg(thetaRight2[0], thetaRight2[1], thetaRight2[2], thetaRight2);
+//   //// start control movement
+//   control_IK_L0(thetaLeft0[0], thetaLeft0[1], thetaLeft0[2]);
+//   control_IK_L1(thetaLeft1[0], thetaLeft1[1], thetaLeft1[2]);
+//   control_IK_L2(thetaLeft2[0], thetaLeft2[1], thetaLeft2[2]);
+//   control_IK_R0(thetaRight0[0], thetaRight0[1], thetaRight0[2]);
+//   control_IK_R1(thetaRight1[0], thetaRight1[1], thetaRight1[2]);
+//   control_IK_R2(thetaRight2[0], thetaRight2[1], thetaRight2[2]);/////////////////////////////                    walking IK no_balance
+/////////////////////////////////////////////// di chuyển có cân bằng
   float thetaRight0[3],thetaRight1[3],thetaRight2[3], thetaLeft0[3], thetaLeft1[3], thetaLeft2[3];
-  float roll = RollTheta(a.acceleration.x), pitch = PitchTheta(a.acceleration.y);
-  WebSerial.print(roll); WebSerial.print("//");WebSerial.print(pitch);
-  float ZdeltaRoll = 0 + roundf((-roll + RollBase)*2),
-        ZdeltaPitch = 0 + roundf((pitch  -  PitchBase)*2);
-  inK(balanece_pos[0], balanece_pos[1], balanece_pos[2] + ZdeltaRoll - ZdeltaPitch , thetaLeft2);                  // Left leg
-  inK(balanece_pos[0], balanece_pos[1], balanece_pos[2] + ZdeltaRoll , thetaLeft1);
-  inK(balanece_pos[0], balanece_pos[1], balanece_pos[2] + ZdeltaRoll + ZdeltaPitch , thetaLeft0);
-  inK(balanece_pos[0], balanece_pos[1], balanece_pos[2] - ZdeltaRoll - ZdeltaPitch  , thetaRight2);                  //Right Leg
-  inK(balanece_pos[0], balanece_pos[1], balanece_pos[2] - ZdeltaRoll , thetaRight1);
-  inK(balanece_pos[0], balanece_pos[1], balanece_pos[2] - ZdeltaRoll + ZdeltaPitch  , thetaRight0);
-  //// convert theta
-  ik_to_theta_control_left_leg(thetaLeft0[0], thetaLeft0[1], thetaLeft0[2], thetaLeft0);
-  ik_to_theta_control_left_leg(thetaLeft1[0], thetaLeft1[1], thetaLeft1[2], thetaLeft1);
-  ik_to_theta_control_left_leg(thetaLeft2[0], thetaLeft2[1], thetaLeft2[2], thetaLeft2);
-  ik_to_theta_control_right_leg(thetaRight0[0], thetaRight0[1], thetaRight0[2], thetaRight0);
-  ik_to_theta_control_right_leg(thetaRight1[0], thetaRight1[1], thetaRight1[2], thetaRight1);
-  ik_to_theta_control_right_leg(thetaRight2[0], thetaRight2[1], thetaRight2[2], thetaRight2);
-  //// start control movement
-  control_IK_L0(thetaLeft0[0], thetaLeft0[1], thetaLeft0[2]);
-  control_IK_L1(thetaLeft1[0], thetaLeft1[1], thetaLeft1[2]);
-  control_IK_L2(thetaLeft2[0], thetaLeft2[1], thetaLeft2[2]);
-  control_IK_R0(thetaRight0[0], thetaRight0[1], thetaRight0[2]);
-  control_IK_R1(thetaRight1[0], thetaRight1[1], thetaRight1[2]);
-  control_IK_R2(thetaRight2[0], thetaRight2[1], thetaRight2[2]);
-  // web Serial
-    // WebSerial.print(thetaRight2[0]); WebSerial.print("//");
-    // WebSerial.print(thetaRight2[1]); WebSerial.print("//");
-    // WebSerial.print(thetaRight2[2]); WebSerial.print("//");
+  for (int i = 0, j = (sizeof(z)/sizeof(float)) /2   ; i< (sizeof(z)/sizeof(float)) /2, j < sizeof(z)/sizeof(float); i++, j++ ){
+    float roll = RollTheta(a.acceleration.x), pitch = PitchTheta(a.acceleration.y);
     // WebSerial.print(roll); WebSerial.print("//");WebSerial.print(pitch);
+    float ZdeltaRoll, ZdeltaPitch;
+    if ((roll < RollBase[0] )||(roll > RollBase[3]))  {                                               // so sánh góc hiện tại và góc cân bằng Roll
+      ZdeltaRoll = roundf((-roll + RollBase[2])*1);
+    }
+    else {
+      ZdeltaRoll = 0;
+    }
+    if ((pitch < PitchBase[0] )||(pitch > PitchBase[3]))  {                                         // so sánh góc hiện tại và góc cân bằng Pitch
+      ZdeltaPitch = roundf((-pitch + PitchBase[2])*1);
+    }
+    else {
+      ZdeltaPitch = 0;
+    }
+    WebSerial.print(ZdeltaRoll); WebSerial.print("//");WebSerial.println(ZdeltaPitch);
+    delay(40);
+    inK(x[i], y[i], z[i] + ZdeltaRoll + ZdeltaPitch , thetaLeft2);                  // Left leg
+    inK(x[j], y[j], z[j]  + ZdeltaRoll , thetaLeft1);
+    inK(x[i], y[i], z[i]  + ZdeltaRoll - ZdeltaPitch , thetaLeft0);
+    inK(x[j], y[j], z[j]  - ZdeltaRoll + ZdeltaPitch  , thetaRight2);                  //Right Leg
+    inK(x[i], y[i], z[i]  - ZdeltaRoll , thetaRight1);
+    inK(x[j], y[j], z[j]  - ZdeltaRoll - ZdeltaPitch  , thetaRight0);
+    //// convert theta
+    ik_to_theta_control_left_leg(thetaLeft0[0], thetaLeft0[1], thetaLeft0[2], thetaLeft0);
+    ik_to_theta_control_left_leg(thetaLeft1[0], thetaLeft1[1], thetaLeft1[2], thetaLeft1);
+    ik_to_theta_control_left_leg(thetaLeft2[0], thetaLeft2[1], thetaLeft2[2], thetaLeft2);
+    ik_to_theta_control_right_leg(thetaRight0[0], thetaRight0[1], thetaRight0[2], thetaRight0);
+    ik_to_theta_control_right_leg(thetaRight1[0], thetaRight1[1], thetaRight1[2], thetaRight1);
+    ik_to_theta_control_right_leg(thetaRight2[0], thetaRight2[1], thetaRight2[2], thetaRight2);
+    //// start control movement
+    control_IK_L0(thetaLeft0[0], thetaLeft0[1], thetaLeft0[2]);
+    control_IK_L1(thetaLeft1[0], thetaLeft1[1], thetaLeft1[2]);
+    control_IK_L2(thetaLeft2[0], thetaLeft2[1], thetaLeft2[2]);
+    control_IK_R0(thetaRight0[0], thetaRight0[1], thetaRight0[2]);
+    control_IK_R1(thetaRight1[0], thetaRight1[1], thetaRight1[2]);
+    control_IK_R2(thetaRight2[0], thetaRight2[1], thetaRight2[2]);
+// web Serial
+  }
     WebSerial.println("//////////////////////////////////////");
   // WebSerial.println("Hello");
-  delay(200);
+  delay(150);
 }
 
 
