@@ -3,15 +3,15 @@
 
 + Branch Main: File chương trình điều khiển, Quỹ đạo, scan I2C, FOTA
   
-     Đường dẫn đến file điều khiển chính: Branch main\main_code\src\main.cpp
+     _Đường dẫn đến file điều khiển chính_: Branch main\main_code\src\main.cpp
   
-     Đường dẫn đến file tính toán quỹ đạo nửa đường tròn: Branch main\main_code\src\test_traject.py
+     _Đường dẫn đến file tính toán quỹ đạo nửa đường tròn_: Branch main\main_code\src\test_traject.py
 
 + Branch design: Mô hình 3D, sơ đồ đấu nối hệ thống điều khiển và hệ thống điện
   
-     Đường dẫn đến folder thiết kế SolidWorks: Branch design\my_3d_stl_file
+     _Đường dẫn đến folder thiết kế SolidWorks_: Branch design\my_3d_stl_file
    
-     Đường dẫn đến foder stl in 3D: Branch design\my_3d_stl_file\stl
+     _Đường dẫn đến foder stl in 3D_: Branch design\my_3d_stl_file\stl
   
 + Video Tổng hợp quá trình, Demo hoạt động: 
 
